@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 input = File.read('./input').split("\n\n")
 
-puts input.map{|g|g.split("\n").join.chars.uniq.count}.sum
+puts input.map { |g| g.split("\n").join.chars.uniq.count }.sum
