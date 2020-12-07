@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-input = File.readlines('./test')
+input = File.readlines('./input')
 
 map = input.map do |line|
   bag = line[/\A(\w+\s\w+)/]
