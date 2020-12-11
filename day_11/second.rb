@@ -1,16 +1,17 @@
+# frozen_string_literal: true
+
 input = File.readlines('./input').map(&:strip).map(&:chars)
 
 $dirs = [
-  [-1,-1],
-  [-1,0],
-  [-1,1],
-  [0,-1],
-  [0,1],
-  [1,-1],
-  [1,0],
-  [1,1]
+  [-1, -1],
+  [-1, 0],
+  [-1, 1],
+  [0, -1],
+  [0, 1],
+  [1, -1],
+  [1, 0],
+  [1, 1]
 ]
-
 
 def round(map)
   output = []
@@ -22,11 +23,13 @@ def round(map)
         y_index = col + y
 
         char = loop do
-          break nil if x_index < 0 || y_index < 0 || x_index >= map.size || y_index >= map[row].size
+          break nil if x_index.negative? || y_index.negative? || x_index >= map.size || y_index >= map[row].size
+
           char = map[x_index]&.[](y_index)
           x_index += x
           y_index += y
           next if char == '.'
+
           break char
         end
 

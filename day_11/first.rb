@@ -1,16 +1,17 @@
+# frozen_string_literal: true
+
 input = File.readlines('./input').map(&:strip).map(&:chars)
 
 $dirs = [
-  [-1,-1],
-  [-1,0],
-  [-1,1],
-  [0,-1],
-  [0,1],
-  [1,-1],
-  [1,0],
-  [1,1]
+  [-1, -1],
+  [-1, 0],
+  [-1, 1],
+  [0, -1],
+  [0, 1],
+  [1, -1],
+  [1, 0],
+  [1, 1]
 ]
-
 
 def round(map)
   output = []
@@ -21,8 +22,9 @@ def round(map)
         x_index = row + x
         y_index = col + y
 
-        next nil if x_index < 0 || y_index < 0
-        map[row+x]&.[](col+y)
+        next nil if x_index.negative? || y_index.negative?
+
+        map[row + x]&.[](col + y)
       end
       occupied = tmp.compact.count('#')
       output[row][col] = case [map[row][col], occupied]
