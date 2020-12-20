@@ -1,51 +1,10 @@
 # frozen_string_literal: true
 
-require 'pry'
-
-# @type [Hash]
-input = File.read('./input').split("\n\n").map do |tile|
-  tile = tile.split("\n")
-  id = tile.shift.scan(/\d+/).first.to_i
-  Hash[id, tile]
-end.inject :merge
-
-# @type [Array]
-$corners = []
-
-def build_combinations(tile)
-  top = tile.first
-  rev_top = top.reverse
-  btm = tile.last
-  rev_btm = btm.reverse
-  left = tile.map { |a| a[0] }.join
-  rev_left = left.reverse
-  right = tile.map { |a| a[-1] }.join
-  rev_right = right.reverse
-  [left, rev_left, right, rev_right, top, rev_top, btm, rev_btm]
-end
-
-def get_sides(tile)
-  top = tile.first
-  btm = tile.last
-  left = tile.map { |a| a[0] }
-  right = tile.map { |a| a[-1] }
-  [top, btm, left, right]
-end
-
-def check_tile(tile, input)
-  tile_id = tile.first
-  combs = build_combinations(tile.last)
-
-  t = input.map do |id, val|
-    next if tile_id == id
-
-    (combs & build_combinations(val)).count
-  end
-end
-
-input.each do |tile|
-  $corners << tile.first if check_tile(tile, input).count(2) == 2
-end
+MONSTER = [
+  /..................#./,
+  /#....##....##....###/,
+  /.#..#..#..#..#..#.../
+].freeze
 
 class Tile
   attr_accessor :id, :grid
@@ -152,31 +111,44 @@ class Tile
     end
     true
   end
+
+  def corner?
+    t = $input.map do |other|
+      next if self == other
+
+      (edge_orientations & other.edge_orientations).count
+    end
+    t.count(2) == 2
+  end
 end
 
 def rotate_top_left(tl)
+  all_edges = $tiles.map(&:edge_orientations).flatten.uniq
   tl.all_orientations.each do |ori|
     left_side = ori.left
     top_side = ori.top
 
-    unless $all_orientations.include?(left_side) || $all_orientations.include?(top_side)
+    unless all_edges.include?(left_side) || all_edges.include?(top_side)
       return ori
     end
   end
   nil
 end
 
-# @type [Array]
-$tiles = input.map do |id, grid|
-  Tile.new id, grid.map(&:chars)
+$input = File.read('./input').split("\n\n").map do |tile|
+  tile = tile.split("\n")
+  id = tile.shift.scan(/\d+/).first.to_i
+  Tile.new id, tile.map(&:chars)
 end
 
-top_left = $tiles.find { |tile| tile.id == $corners.first }
-$tiles.delete(top_left)
-$all_orientations = $tiles.map(&:edge_orientations).flatten.uniq
+corner = $input.find(&:corner?)
+
+$tiles = $input.dup
+
+$tiles.delete(corner)
 
 $map = [[]]
-$map[0] << rotate_top_left(top_left)
+$map[0] << rotate_top_left(corner)
 
 11.times do
   $map[0] << $map[0].last.find_matching_right_from($tiles)
@@ -193,13 +165,9 @@ end
 end
 
 corners = [$map[0][0].id, $map[0][11].id, $map[11][0].id, $map[11][11].id]
-puts "Corners: #{$corners.inspect}"
+
+puts "Corners: #{corners.inspect}"
 puts "Product of corner ids: #{corners.inject(:*)}"
-MONSTER = [
-  /..................#./,
-  /#....##....##....###/,
-  /.#..#..#..#..#..#.../
-].freeze
 image = ''
 
 $map.each do |row|
